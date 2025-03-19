@@ -1,51 +1,64 @@
-# Welcome to your Convex + Next.js + Clerk app
+# Receipt Tracker SaaS Application
 
-This is a [Convex](https://convex.dev/) project created with [`npm create convex`](https://www.npmjs.com/package/create-convex).
+A modern, full-stack receipt tracking application built with:
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+- [Convex](https://convex.dev/) as the backend (database, server functions)
+- [React](https://react.dev/) and [Next.js](https://nextjs.org/) for the frontend
+- [Tailwind](https://tailwindcss.com/) for responsive, beautiful UI
+- [Clerk](https://clerk.com/) for secure authentication
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [Next.js](https://nextjs.org/) for optimized web hosting and page routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [Clerk](https://clerk.com/) for authentication
+## Features
 
-## Get started
+- 📱 Mobile-friendly receipt capture and management
+- 📊 Expense tracking and categorization
+- 📈 Financial insights and reporting
+- 🔒 Secure multi-user support
+- 📁 Cloud storage for receipt images
+- 🏷️ Custom tagging and organization
 
-If you just cloned this codebase and didn't use `npm create convex`, run:
+## Getting Started
 
-```
+### Prerequisites
+
+- Node.js 16 or higher
+- npm or yarn
+- A Clerk account for authentication
+- A Convex account for the backend
+
+### Installation
+
+1. Clone this repository
+2. Install dependencies:
+
+```bash
 npm install
+```
+
+3. Start the development server:
+
+```bash
 npm run dev
 ```
 
-If you're reading this README on GitHub and want to use this template, run:
+### Configuration
 
-```
-npm create convex@latest -- -t nextjs-clerk
-```
-
-Then:
-
-1. Open your app. There should be a "Claim your application" button from Clerk in the bottom right of your app.
-2. Follow the steps to claim your application and link it to this app.
-3. Follow step 3 in the [Convex Clerk onboarding guide](https://docs.convex.dev/auth/clerk#get-started) to create a Convex JWT template.
+1. Open your app and look for the "Claim your application" button from Clerk in the bottom right
+2. Follow the steps to claim your application and link it to this app
+3. Follow step 3 in the [Convex Clerk onboarding guide](https://docs.convex.dev/auth/clerk#get-started) to create a Convex JWT template
 4. Uncomment the Clerk provider in `convex/auth.config.ts`
-5. Paste the Issuer URL as `CLERK_JWT_ISSUER_DOMAIN` to your dev deployment environment variable settings on the Convex dashboard (see [docs](https://docs.convex.dev/auth/clerk#configuring-dev-and-prod-instances))
+5. Set up your `CLERK_JWT_ISSUER_DOMAIN` in your Convex deployment environment variables (see [docs](https://docs.convex.dev/auth/clerk#configuring-dev-and-prod-instances))
 
-If you want to sync Clerk user data via webhooks, check out this [example repo](https://github.com/thomasballinger/convex-clerk-users-table/).
+## Development Resources
 
-## Learn more
+- [Convex Documentation](https://docs.convex.dev/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Clerk Documentation](https://clerk.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
-To learn more about developing your project with Convex, check out:
+## Support
 
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
+Join the [Convex Discord community](https://convex.dev/community) for real-time help and discussions.
 
-## Join the community
+## License
 
-Join thousands of developers building full-stack apps with Convex:
-
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+This project is licensed under the MIT License - see the LICENSE file for details.
