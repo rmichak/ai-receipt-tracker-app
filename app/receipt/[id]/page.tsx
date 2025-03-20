@@ -2,21 +2,47 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { useSchematicFlag } from "@schematichq/schematic-react";
 import { useQuery } from "convex/react";
-import { ChevronLeft, FileText } from "lucide-react";
+import { ChevronLeft, FileText, Sparkles, Lightbulb, Lock } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+// Add interface for Receipt type
+interface Receipt {
+  _id: Id<"receipts">;
+  _creationTime: number;
+  fileDisplayName?: string;
+  fileName: string;
+  size: number;
+  mimeType: string;
+  status: "pending" | "processed" | "failed";
+  merchantName?: string;
+  merchantAddress?: string;
+  merchantContact?: string;
+  transactionDate?: string;
+  transactionAmount?: number;
+  currency?: string;
+  aiSummary?: string;
+  fileId: Id<"_storage">;
+  items: Array<{
+    name: string;
+    price: number;
+  }>;
+  receiptSummary?: string;
+}
 
 function Receipt() {
   const params = useParams<{ id: string }>();
   const [receiptId, setReceiptId] = useState<Id<"receipts"> | null>(null);
   const router = useRouter();
+  const isSummariesEnabled = useSchematicFlag("summary");
 
   const receipt = useQuery(
     api.receipts.getReceiptById,
     receiptId ? { id: receiptId } : "skip",
-  );
+  ) as Receipt | undefined | null;
 
   //Get the file download url
   const fileId = receipt?.fileId;
@@ -67,7 +93,7 @@ function Receipt() {
   }
 
   // Format upload date
-  const uploadDate = new Date(receipt.uploadedAt).toLocaleString();
+  const uploadDate = new Date(receipt._creationTime).toLocaleString();
 
   // Check if receipt has extracted data
   const hasExtractedData = !!(
@@ -96,34 +122,34 @@ function Receipt() {
               <h1 className="text-2xl font-bold text-gray-900 truncate">
                 {receipt.fileDisplayName || receipt.fileName}
               </h1>
-            </div>
-            <div className="flex items-center">
-              {receipt.status === "pending" ? (
-                <div className="mr-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-800"></div>
-                </div>
-              ) : null}
-              <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  receipt.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : receipt.status === "processed"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                }`}
-              >
-                {receipt.status.charAt(0).toUpperCase() +
-                  receipt.status.slice(1)}
-              </span>
+              <div className="flex items-center">
+                {receipt.status === "pending" ? (
+                  <div className="mr-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-800"></div>
+                  </div>
+                ) : null}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    receipt.status === "pending"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : receipt.status === "processed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {receipt.status.charAt(0).toUpperCase() +
+                    receipt.status.slice(1)}
+                </span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Info Column */}
+            {/* File Information and PDF Preview Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-gray-500">
                   File Information
                 </h3>
-                <div className="mt-2 bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-4 rounded-lg h-full">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">Uploaded</p>
@@ -147,32 +173,49 @@ function Receipt() {
                     </div>
                   </div>
                 </div>
-                {/* Download */}
-                <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <FileText className="h-16 w-16 text-blue-500 mx-auto" />
-                    <p className="mt-4 text-sm text-gray-500">PDF Preview</p>
-                    {downloadUrl && (
-                      <a
-                        href={downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-4 px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 inline-block"
-                      >
-                        View PDF
-                      </a>
-                    )}
-                  </div>
+              </div>
+
+              {/* PDF Preview */}
+              <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <FileText className="h-16 w-16 text-blue-500 mx-auto" />
+                  <p className="mt-4 text-sm text-gray-500">PDF Preview</p>
+                  {downloadUrl && (
+                    <a
+                      href={downloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 inline-block"
+                    >
+                      View PDF
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-          {/* Extracted Data Section */}
-          {hasExtractedData && (
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold mb-4">Receipt Details</h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* AI Summary Section */}
+            {receipt.aiSummary && (
+              <div className="mt-6 bg-blue-50 p-6 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-lg font-semibold text-blue-900">AI Summary</h3>
+                  <span className="text-blue-600">✨</span>
+                </div>
+                <p className="text-sm text-blue-800">{receipt.aiSummary}</p>
+                <div className="mt-2">
+                  <p className="text-xs text-blue-600 italic">
+                    AI-generated summary based on receipt data
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Receipt Details Section */}
+          {hasExtractedData && (
+            <div className="mt-8 px-6 pb-6">
+              <h3 className="text-lg font-semibold mb-4">Receipt Details</h3>
+              <div className="grid md:grid-cols-2 gap-6">
                 {/* Merchant Details */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium text-gray-700 mb-3">
@@ -201,11 +244,89 @@ function Receipt() {
                 </div>
 
                 {/* Transaction Details */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-700 mb-3">
+                    Transaction Details
+                  </h4>
+                  <div className="space-y-2">
+                    {receipt.transactionDate && (
+                      <div>
+                        <p className="text-sm text-gray-500">Date</p>
+                        <p className="font-medium">
+                          {new Date(receipt.transactionDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                    {receipt.transactionAmount && (
+                      <div>
+                        <p className="text-sm text-gray-500">Amount</p>
+                        <p className="font-medium">
+                          {formatCurrency(receipt.transactionAmount, receipt.currency)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
-          {/* End of Extracted Data Section */}
+          {/* End of Receipt Details Section */}
         </div>
+
+        {/* Receipt Summary Section */}
+        {receipt.receiptSummary ? (
+          isSummariesEnabled ? (
+            <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100 shadow-sm">
+              <div className="flex items-center mb-4">
+                <h4 className="font-semibold text-blue-700">AI Summary</h4>
+              </div>
+              <div className="ml-2 flex">
+                <Sparkles className="h-3.5 w-3.5 text-yellow-500" />
+                <Sparkles className="h-3 w-3 text-yellow-400 -ml-1" />
+              </div>
+              <div className="bg-white bg-opacity-60 rounded-lg p-4 border border-blue-100">
+                <p className="text-sm whitespace-pre-line leading-relaxed text-gray-700">
+                  {receipt.receiptSummary}
+                </p>
+              </div>
+              <div className="mt-3 text-xs text-blue-600 italic flex items-center">
+                <Lightbulb className="h-3 w-3 mr-1" />
+                <span>
+                  AI-generated summary based on receipt data
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 bg-gray-100 p-6 rounded-lg border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <h4 className="font-semibold text-gray-500">AI Summary</h4>
+                </div>
+                <Lock className="h-4 w-4 text-gray-500" />
+              </div>
+              <div className="bg-white bg-opacity-50 rounded-lg p-4 border border-gray-200 flex flex-col items-center justify-center">
+                <Link
+                  href="/manage-plan"
+                  className="text-center py-4"
+                >
+                  <Lock className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500 mb-2">
+                    AI summary is a PRO level feature
+                  </p>
+                  <button className="mt-2 px-4 py-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 inline-block">
+                    Upgrade to Unlock
+                  </button>
+                </Link>
+              </div>
+              <div className="mt-3 text-xs text-gray-400 italic flex items-center">
+                <Lightbulb className="h-3 w-3 mr-1" />
+                <span>
+                  AI-generated summary based on receipt data
+                </span>
+              </div>
+            </div>
+          )
+        ) : null}
       </div>
     </div>
   );
@@ -225,6 +346,14 @@ function formatFileSize(bytes: number): string {
 }
 
 // Helper function to format currency
-function formatCurrency(amount: number, currency: string = ""): string {
-  return `${amount.toFixed(2)}${currency ? ` ${currency}` : ""}`;
+function formatCurrency(amount: number | undefined | string, currency?: string): string {
+  if (amount === undefined || amount === null) return "";
+  
+  // Convert to number if it's a string
+  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+  
+  // Check if it's a valid number
+  if (isNaN(numericAmount)) return "";
+  
+  return `${numericAmount.toFixed(2)}${currency ? ` ${currency}` : ""}`;
 }
